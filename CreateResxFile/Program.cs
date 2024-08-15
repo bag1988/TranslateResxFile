@@ -4,7 +4,7 @@ using System.Xml.Linq;
 
 while (true)
 {
-    Console.WriteLine("Начать создание файлов?(Д/Н). Для выхода введите расшифровку <ДНК>");
+    Console.WriteLine("Начать создание файлов?(Д/Н).");
 
     var answer = Console.ReadLine();
 
@@ -197,7 +197,7 @@ while (true)
             Console.WriteLine("Файла с переводом не найден");
         }
     }
-    else if (answer == "Дезоксирибонуклеиновая кислота")
+    else if (answer == "Н")
     {
         return;
     }

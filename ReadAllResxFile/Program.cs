@@ -3,7 +3,7 @@ using System.Xml.Linq;
 
 while (true)
 {
-    Console.WriteLine("Начать сбор данных?(Д/Н). Для выхода введите расшифровку <ДНК>");
+    Console.WriteLine("Начать сбор данных?(Д/Н).");
 
     var answer = Console.ReadLine();
 
@@ -145,7 +145,7 @@ while (true)
 
 
     }
-    else if (answer == "Дезоксирибонуклеиновая кислота")
+    else if (answer == "Н")
     {
         return;
     }
