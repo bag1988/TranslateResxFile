@@ -50,19 +50,35 @@ while (true)
 
             if (tempValue.Count > 0)
             {
-                Console.WriteLine("Введите путь для сохранения файла (*.txt)");
+                Console.WriteLine("Введите путь к текущему файлу для сохранения файла (*.json)");
 
-                answer = Console.ReadLine();
+                var saveToFile = Console.ReadLine();
 
-                var dir = Path.GetDirectoryName(answer);
-
-                if (!string.IsNullOrEmpty(answer) && !string.IsNullOrEmpty(dir))
+                if (File.Exists(saveToFile))
                 {
-                    if (!Directory.Exists(dir))
+                    Console.WriteLine("Дублирующие значение перезаписывать новыми? (Д/Н)");
+
+
+                    answer = Console.ReadLine();
+
+                    bool isReplace = answer == "Д";
+
+                    var oldFileText = await File.ReadAllTextAsync(saveToFile);
+
+                    var oldValueFromFile = JsonSerializer.Deserialize<Dictionary<string, object>>(oldFileText) ?? new();
+
+                    if (isReplace)
                     {
-                        Directory.CreateDirectory(dir);
+                        oldValueFromFile = oldValueFromFile.ExceptBy(tempValue.Keys, x => x.Key).ToDictionary();
                     }
-                    Console.WriteLine("Сохраняем в файл");
+
+                    foreach (var item in tempValue)
+                    {
+                        if (!oldValueFromFile.ContainsKey(item.Key))
+                        {
+                            oldValueFromFile.Add(item.Key, item.Value);
+                        }
+                    }
 
                     var options = new JsonSerializerOptions
                     {
@@ -70,13 +86,14 @@ while (true)
                         WriteIndented = true
                     };
 
-                    await File.WriteAllTextAsync(answer, JsonSerializer.Serialize(tempValue, options), encoding: Encoding.UTF8);
+                    await File.WriteAllTextAsync(saveToFile, JsonSerializer.Serialize(oldValueFromFile, options), encoding: Encoding.UTF8);
 
                     Console.WriteLine("Файл записан!");
+
                 }
                 else
                 {
-                    Console.WriteLine("Введено пустое значение");
+                    Console.WriteLine("Файла не найден!");
                 }
             }
 
