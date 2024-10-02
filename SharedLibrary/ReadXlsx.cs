@@ -3,7 +3,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Text.RegularExpressions;
 
-namespace CreateResxFile
+namespace SharedLibrary
 {
     public static class ReadXlsx
     {
@@ -54,7 +54,6 @@ namespace CreateResxFile
                             } while (reader.ReadNextSibling());
                             translateInfo.Add(childList);
                         }
-
                     }
                 }
             }
@@ -63,6 +62,92 @@ namespace CreateResxFile
                 Console.WriteLine("Ошибка чтения файла {0}", ex.Message);
             }
             return translateInfo;
+        }
+
+
+        public static bool SaveToFile(string path, Dictionary<string, List<string>> tab)
+        {
+            using (var spreadsheetDocument = SpreadsheetDocument.Open(path, false))
+            {
+                WorkbookPart workbookPart = spreadsheetDocument.WorkbookPart ?? spreadsheetDocument.AddWorkbookPart();
+                WorksheetPart worksheetPart = workbookPart.WorksheetParts.First();
+
+                var sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+
+                uint rowIndex = 1;
+                foreach (var d in tab)
+                {
+                    var row = new Row() { RowIndex = rowIndex };
+                    sheetData!.Append(row);
+
+                    int i = 1;
+                    foreach (var t in d.Value)
+                    {
+                        var newCell = new Cell() { CellReference = (GetColumnName(i) + rowIndex) };
+
+                        row.Append(newCell);
+
+                        newCell.CellValue = new CellValue(t);
+
+                        if (int.TryParse(t, out int ints))
+                        {
+                            newCell.DataType = new EnumValue<CellValues>(CellValues.Number);
+                        }
+                        else
+                            newCell.DataType = new EnumValue<CellValues>(CellValues.String);
+                        i++;
+                    }
+                    rowIndex++;
+                }
+                workbookPart.Workbook.Save();
+
+                return true;
+            }
+        }
+
+        public static bool AddRowToFile(string path, Dictionary<string, List<string>> tab, uint startRowIndexInsert)
+        {
+            using (var spreadsheetDocument = SpreadsheetDocument.Open(path, true))
+            {
+                WorkbookPart workbookPart = spreadsheetDocument.WorkbookPart ?? spreadsheetDocument.AddWorkbookPart();
+                WorksheetPart worksheetPart = workbookPart.WorksheetParts.First();
+
+                var sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+
+                if (sheetData != null)
+                {
+                    uint rowIndex = startRowIndexInsert + 2;
+                    foreach (var d in tab)
+                    {
+                        var row = new Row() { RowIndex = rowIndex };
+
+                        sheetData.Append(row);
+
+                        int i = 1;
+                        foreach (var t in d.Value)
+                        {
+                            var newCell = new Cell() { CellReference = (GetColumnName(i) + rowIndex) };
+
+                            row.Append(newCell);
+
+                            newCell.CellValue = new CellValue(t);
+
+                            if (int.TryParse(t, out int ints))
+                            {
+                                newCell.DataType = new EnumValue<CellValues>(CellValues.Number);
+                            }
+                            else
+                                newCell.DataType = new EnumValue<CellValues>(CellValues.String);
+                            i++;
+                        }
+                        rowIndex++;
+                    }
+                    workbookPart.Workbook.Save();
+
+                    return true;
+                }
+            }
+            return false;
         }
 
         static string GetColumnName(int colIndex)

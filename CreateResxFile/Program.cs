@@ -1,5 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using CreateResxFile;
+using SharedLibrary;
 using System.Xml.Linq;
 
 while (true)
