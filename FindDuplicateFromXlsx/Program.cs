@@ -104,7 +104,7 @@ while (true)
                                         currentRoot.Save(file);
                                     }
 
-                                    cacheValue.AddRange(tempValues.Where(x => !string.IsNullOrEmpty(x)).Except(cacheValue));
+                                    cacheValue.AddRange(tempValues.Where(x => !string.IsNullOrEmpty(x)).ExceptBy(cacheValue.Select(x => Regex.Replace(x, "\\W+", "_").ToLower()), x => Regex.Replace(x, "\\W+", "_").ToLower()));
 
                                     Console.WriteLine("В файле {0} найдено {1} строк", Path.GetFileNameWithoutExtension(file), tempValues.Count);
                                 }
@@ -146,7 +146,6 @@ while (true)
                                                 int.TryParse(x.Groups[1].Value, out var r);
                                                 return "{" + $"{r - 1}" + "}";
                                             });
-
                                         }
                                     }
                                     Console.WriteLine("Перезаписаны параметры {0}", countReplace);
@@ -162,7 +161,7 @@ while (true)
                             }
                         }
 
-                        cacheValue = cacheValue.Except(currentValue).ToList();
+                        cacheValue = cacheValue.ExceptBy(currentValue.Select(x => Regex.Replace(x, "\\W+", "_").ToLower()), x=> Regex.Replace(x, "\\W+", "_").ToLower()).ToList();
 
                         Console.WriteLine("После удаления дубликатов найдено {0} строк", cacheValue.Count);
 
